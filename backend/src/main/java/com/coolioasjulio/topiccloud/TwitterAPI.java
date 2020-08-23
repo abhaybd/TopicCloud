@@ -44,6 +44,10 @@ public class TwitterAPI {
         }
     }
 
+    public String getProfilePicURL(String name) throws TwitterException {
+        return client.users().showUser(name).get400x400ProfileImageURLHttps();
+    }
+
     public List<Status> getRecentTweets(String name, int numTweets) throws TwitterException {
         Paging p = new Paging(1, numTweets);
         return client.getUserTimeline(name, p);

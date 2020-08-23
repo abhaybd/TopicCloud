@@ -5,12 +5,22 @@
          version="4.0">
 
     <servlet>
-        <servlet-name>DataServlet</servlet-name>
-        <servlet-class>com.coolioasjulio.topiccloud.DataServlet</servlet-class>
+        <servlet-name>KeywordServlet</servlet-name>
+        <servlet-class>com.coolioasjulio.topiccloud.KeywordServlet</servlet-class>
+    </servlet>
+
+    <servlet>
+        <servlet-name>TwitterInfoServlet</servlet-name>
+        <servlet-class>com.coolioasjulio.topiccloud.TwitterInfoServlet</servlet-class>
     </servlet>
 
     <servlet-mapping>
-        <servlet-name>DataServlet</servlet-name>
-        <url-pattern>/api</url-pattern>
+        <servlet-name>KeywordServlet</servlet-name>
+        <url-pattern>/api/keywords</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>TwitterInfoServlet</servlet-name>
+        <url-pattern>/api/twitterinfo</url-pattern>
     </servlet-mapping>
 </web-app>

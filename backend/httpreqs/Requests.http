@@ -10,7 +10,8 @@ POST http://localhost:8080/api/keywords
 Content-Type: application/json
 
 {
-  "screenName":"@GovInslee"
+  "screenName":"@GovInslee",
+  "numKeywords": 15
 }
 
 ###

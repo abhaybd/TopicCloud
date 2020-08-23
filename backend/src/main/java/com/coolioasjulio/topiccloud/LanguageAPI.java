@@ -8,7 +8,6 @@ import com.google.common.collect.Lists;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.*;
@@ -53,7 +52,7 @@ public class LanguageAPI {
         client = LanguageServiceClient.create(settings);
     }
 
-    public List<Word> getEntities(List<String> texts, double threshold) {
+    public List<Word> getEntities(List<String> texts, double wordThreshold) {
         List<ApiFuture<AnalyzeEntitiesResponse>> futures = texts.stream()
                 .map(s -> Document.newBuilder().setContent(s).setType(Document.Type.PLAIN_TEXT).build())
                 .map(doc -> AnalyzeEntitiesRequest.newBuilder().setDocument(doc).build())
@@ -66,7 +65,7 @@ public class LanguageAPI {
                 try {
                     AnalyzeEntitiesResponse response = future.get();
                     response.getEntitiesList().stream()
-                            .filter(e -> e.getSalience() >= threshold)
+                            .filter(e -> e.getSalience() >= wordThreshold)
                             .forEach(e -> {
                                 if (map.containsKey(e.getName())) {
                                     map.put(e.getName(), new Word(e.getName(), map.get(e.getName()).value + e.getSalience()));

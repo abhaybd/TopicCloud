@@ -7,6 +7,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Comparator;
 import java.util.List;
 
 public class KeywordServlet extends HttpServlet {
@@ -20,7 +21,7 @@ public class KeywordServlet extends HttpServlet {
             Gson gson = new Gson();
             Request request = gson.fromJson(req.getReader(), Request.class);
 
-            if (request != null && request.screenName != null) {
+            if (request != null && request.screenName != null && request.numKeywords != null) {
                 Response response = processRequest(request);
                 if (response != null) {
                     String json = gson.toJson(response);
@@ -32,7 +33,7 @@ public class KeywordServlet extends HttpServlet {
                     resp.sendError(500, "An unexpected error occurred!");
                 }
             } else {
-                resp.sendError(400, "Request must define a screen name");
+                resp.sendError(400, "Illegally formatted request!");
             }
         }
     }
@@ -41,8 +42,11 @@ public class KeywordServlet extends HttpServlet {
         try {
             List<String> tweets = TwitterAPI.getInstance().getRecentTweetsSanitized(request.screenName, NUM_TWEETS);
             List<Word> words = LanguageAPI.getInstance().getEntities(tweets, SALIENCE_THRESHOLD);
+            words.sort(((Comparator<Word>) Word::compareTo).reversed());
 
-            return new Response(System.currentTimeMillis(), words.toArray(new Word[0]));
+            int sublistLen = Math.min(words.size(), request.numKeywords);
+
+            return new Response(System.currentTimeMillis(), words.subList(0, sublistLen).toArray(new Word[0]));
         } catch (TwitterException e) {
             e.printStackTrace();
             return null;
@@ -51,9 +55,11 @@ public class KeywordServlet extends HttpServlet {
 
     private static class Request {
         public final String screenName;
+        public final Integer numKeywords;
 
-        private Request(String screenName) {
+        private Request(String screenName, Integer numKeywords) {
             this.screenName = screenName;
+            this.numKeywords = numKeywords;
         }
     }
 

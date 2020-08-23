@@ -147,3 +147,6 @@ buildNumber.properties
 .mvn/wrapper/maven-wrapper.jar
 
 # End of https://www.toptal.com/developers/gitignore/api/intellij,java,java-web,maven
+
+twitter4j.properties
+src/main/resources/auth.json

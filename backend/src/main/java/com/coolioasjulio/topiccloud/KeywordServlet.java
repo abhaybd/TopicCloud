@@ -22,6 +22,7 @@ public class KeywordServlet extends HttpServlet {
             Request request = gson.fromJson(req.getReader(), Request.class);
 
             if (request != null && request.screenName != null && request.numKeywords != null) {
+                System.out.printf("Request: %s, num: %d\n", request.screenName, request.numKeywords);
                 Response response = processRequest(request);
                 if (response != null) {
                     String json = gson.toJson(response);

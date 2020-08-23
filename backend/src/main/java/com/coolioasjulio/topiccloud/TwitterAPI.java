@@ -63,6 +63,7 @@ public class TwitterAPI {
         return text
                 .replaceAll("\\s+", " ")
                 .replaceAll("https?://\\S+", "")
+                .replaceAll("RT @\\S+", "")
                 .trim();
     }
 }

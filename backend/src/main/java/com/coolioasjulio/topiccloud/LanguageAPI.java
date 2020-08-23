@@ -1,12 +1,17 @@
 package com.coolioasjulio.topiccloud;
 
+import com.google.api.core.ApiFuture;
 import com.google.api.gax.core.CredentialsProvider;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.cloud.language.v1.*;
 import com.google.common.collect.Lists;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
 public class LanguageAPI {
@@ -46,6 +51,38 @@ public class LanguageAPI {
 
         LanguageServiceSettings settings = LanguageServiceSettings.newBuilder().setCredentialsProvider(provider).build();
         client = LanguageServiceClient.create(settings);
+    }
+
+    public List<Word> getEntities(List<String> texts, double threshold) {
+        List<ApiFuture<AnalyzeEntitiesResponse>> futures = texts.stream()
+                .map(s -> Document.newBuilder().setContent(s).setType(Document.Type.PLAIN_TEXT).build())
+                .map(doc -> AnalyzeEntitiesRequest.newBuilder().setDocument(doc).build())
+                .map(client.analyzeEntitiesCallable()::futureCall)
+                .collect(Collectors.toList());
+
+        HashMap<String, Word> map = new HashMap<>();
+        try {
+            for (ApiFuture<AnalyzeEntitiesResponse> future : futures) {
+                try {
+                    AnalyzeEntitiesResponse response = future.get();
+                    response.getEntitiesList().stream()
+                            .filter(e -> e.getSalience() >= threshold)
+                            .forEach(e -> {
+                                if (map.containsKey(e.getName())) {
+                                    map.put(e.getName(), new Word(e.getName(), map.get(e.getName()).value + e.getSalience()));
+                                } else {
+                                    map.put(e.getName(), new Word(e.getName(), e.getSalience()));
+                                }
+                            });
+                } catch (ExecutionException e) {
+                    e.printStackTrace();
+                }
+            }
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+
+        return new ArrayList<>(map.values());
     }
 
     public List<Word> getEntities(String text, double threshold) {

@@ -8,7 +8,7 @@ import java.util.*;
 public class Playground {
     public static void main(String[] args) throws TwitterException {
         String user = "@GovInslee";
-        List<String> tweets = TwitterAPI.getRecentTweetsSanitized(user, 100);
+        List<String> tweets = TwitterAPI.getInstance().getRecentTweetsSanitized(user, 100);
 
         Map<String, Double> scoreMap = new HashMap<>();
         for (String text : tweets) {

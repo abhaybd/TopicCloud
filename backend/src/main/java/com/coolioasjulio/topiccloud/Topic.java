@@ -1,13 +1,15 @@
 package com.coolioasjulio.topiccloud;
 
+import java.util.List;
 import java.util.Objects;
 
-public class Word implements Comparable<Word> {
+public class Topic implements Comparable<Topic> {
     public String text;
     public double value;
     public double score;
+    public List<Long> tweetIds;
 
-    public Word(String text, double value, double score) {
+    public Topic(String text, double value, double score) {
         this.text = text;
         this.value = value;
         this.score = score;
@@ -19,7 +21,7 @@ public class Word implements Comparable<Word> {
     }
 
     @Override
-    public int compareTo(Word o) {
+    public int compareTo(Topic o) {
         int compare = Double.compare(value, o.value);
         return compare == 0 ? text.compareTo(o.text) : compare;
     }
@@ -28,9 +30,9 @@ public class Word implements Comparable<Word> {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Word word = (Word) o;
-        return Double.compare(word.value, value) == 0 &&
-                text.equals(word.text);
+        Topic topic = (Topic) o;
+        return Double.compare(topic.value, value) == 0 &&
+                text.equals(topic.text);
     }
 
     @Override

@@ -9,7 +9,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class KeywordServlet extends HttpServlet {
 
@@ -41,23 +40,16 @@ public class KeywordServlet extends HttpServlet {
         }
     }
 
-    private Response<Result[]> processRequest(Request request) {
+    private Response<List<Topic>> processRequest(Request request) {
         try {
             List<Status> tweets = TwitterAPI.getInstance().getRecentTweets(request.screenName, NUM_TWEETS);
-            Map<Word, List<Long>> wordTweetMap = LanguageAPI.getInstance().getEntitiesAndIds(tweets, SALIENCE_THRESHOLD);
-            int sublistLen = Math.min(wordTweetMap.size(), request.numKeywords);
+            List<Topic> topics = LanguageAPI.getInstance().getTopics(tweets, SALIENCE_THRESHOLD);
+            int sublistLen = Math.min(topics.size(), request.numKeywords);
 
-            Set<Word> words = wordTweetMap.keySet()
-                    .stream()
-                    .sorted(((Comparator<Word>) Word::compareTo).reversed())
-                    .limit(sublistLen)
-                    .collect(Collectors.toCollection(HashSet::new));
+            topics.sort(((Comparator<Topic>) Topic::compareTo).reversed());
+            topics = topics.subList(0, sublistLen);
 
-            wordTweetMap.keySet().retainAll(words);
-
-            Result[] results = wordTweetMap.entrySet().stream().map(e -> new Result(e.getKey(), e.getValue())).toArray(Result[]::new);
-
-            return new Response<>(System.currentTimeMillis(), results);
+            return new Response<>(System.currentTimeMillis(), topics);
         } catch (TwitterException e) {
             e.printStackTrace();
             return null;
@@ -75,11 +67,11 @@ public class KeywordServlet extends HttpServlet {
     }
 
     private static class Result {
-        public final Word word;
+        public final Topic topic;
         public final List<Long> ids;
 
-        private Result(Word word, List<Long> ids) {
-            this.word = word;
+        private Result(Topic topic, List<Long> ids) {
+            this.topic = topic;
             this.ids = ids;
         }
     }

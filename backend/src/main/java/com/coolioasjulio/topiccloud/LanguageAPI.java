@@ -54,7 +54,7 @@ public class LanguageAPI {
         client = LanguageServiceClient.create(settings);
     }
 
-    public Map<Word, List<Long>> getEntitiesAndIds(List<Status> tweets, double wordThreshold) {
+    public List<Topic> getTopics(List<Status> tweets, double wordThreshold) {
         Map<ApiFuture<AnalyzeEntitySentimentResponse>, Long> futures = new HashMap<>();
         for (Status tweet : tweets) {
             String content = TwitterAPI.sanitizedContent(tweet);
@@ -64,8 +64,8 @@ public class LanguageAPI {
             futures.put(future, tweet.getId());
         }
 
-        Map<String, List<Word>> wordMap = new HashMap<>();
-        Map<String, List<Long>> wordTweetMap = new HashMap<>();
+        Map<String, List<Topic>> topicMap = new HashMap<>();
+        Map<String, List<Long>> topicTweetMap = new HashMap<>();
         try {
             for (ApiFuture<AnalyzeEntitySentimentResponse> future : futures.keySet()) {
                 try {
@@ -75,11 +75,11 @@ public class LanguageAPI {
                             .filter(e -> e.getSalience() >= wordThreshold)
                             .forEach(e -> {
                                 String word = e.getName();
-                                wordMap.putIfAbsent(word, new ArrayList<>());
-                                wordMap.get(word).add(new Word(word, e.getSalience(), e.getSentiment().getScore()));
+                                topicMap.putIfAbsent(word, new ArrayList<>());
+                                topicMap.get(word).add(new Topic(word, e.getSalience(), e.getSentiment().getScore()));
 
-                                wordTweetMap.putIfAbsent(word, new ArrayList<>());
-                                wordTweetMap.get(word).add(id);
+                                topicTweetMap.putIfAbsent(word, new ArrayList<>());
+                                topicTweetMap.get(word).add(id);
                             });
                 } catch (ExecutionException e) {
                     e.printStackTrace();
@@ -89,28 +89,30 @@ public class LanguageAPI {
             throw new RuntimeException(e);
         }
 
-        return wordMap.values()
+        return topicMap.values()
                 .stream()
                 .map(words -> {
-                    Word word = words.stream()
+                    Topic topic = words.stream()
                             .reduce((cum, w) -> {
                                 cum.value += w.value;
                                 cum.score += w.score;
                                 return cum;
                             })
                             .orElseThrow(IllegalStateException::new);
-                    return new Word(word.text, word.value, word.score / words.size());
+                    topic.score /= words.size();
+                    topic.tweetIds = topicTweetMap.get(topic.text);
+                    return topic;
                 })
-                .collect(Collectors.toMap(word -> word, word -> wordTweetMap.get(word.text)));
+                .collect(Collectors.toList());
     }
 
-    public List<Word> getEntities(String text, double threshold) {
+    public List<Topic> getEntities(String text, double threshold) {
         Document doc = Document.newBuilder().setContent(text).setType(Document.Type.PLAIN_TEXT).build();
         AnalyzeEntitySentimentResponse response = client.analyzeEntitySentiment(doc);
         return response.getEntitiesList()
                 .stream()
                 .filter(e -> e.getSalience() > threshold)
-                .map(e -> new Word(e.getName(), e.getSalience(), e.getSentiment().getScore()))
+                .map(e -> new Topic(e.getName(), e.getSalience(), e.getSentiment().getScore()))
                 .collect(Collectors.toList());
     }
 }

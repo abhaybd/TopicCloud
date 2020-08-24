@@ -48,13 +48,13 @@ function TweetDisplay(props) {
 
     let tweets = null;
     if (props.content.ids) {
-        tweets = props.content.ids.map(id => <Tweet tweetId={id} align="center"/>);
+        tweets = props.content.ids.map(id => <Tweet tweetId={id} align="right"/>);
     }
 
     return (
         <div>
             <p>Topic: {props.content.topic}</p>
-            <div style={{overflowY: "scroll", height: "600px"}}>
+            <div style={{overflowY: "scroll", width: "700px", height: "400px", margin: "0 auto"}}>
                 {tweets}
             </div>
         </div>
@@ -73,7 +73,7 @@ function App() {
 
     function submit(event) {
         event.preventDefault();
-        doPost("api/keywords", {screenName: screenName, numKeywords: 100}, function (data) {
+        doPost("api/keywords", {screenName: screenName, numKeywords: 200}, function (data) {
             let words = data.content;
             console.log(words);
             setWordCloud(<ReactWordcloud words={words} size={[600, 400]}

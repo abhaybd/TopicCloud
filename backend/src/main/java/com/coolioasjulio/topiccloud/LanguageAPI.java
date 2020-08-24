@@ -8,10 +8,7 @@ import com.google.common.collect.Lists;
 import twitter4j.Status;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
@@ -65,7 +62,7 @@ public class LanguageAPI {
         }
 
         Map<String, List<Topic>> topicMap = new HashMap<>();
-        Map<String, List<String>> topicTweetMap = new HashMap<>();
+        Map<String, Set<String>> topicTweetMap = new HashMap<>();
         try {
             for (ApiFuture<AnalyzeEntitySentimentResponse> future : futures.keySet()) {
                 try {
@@ -78,7 +75,7 @@ public class LanguageAPI {
                                 topicMap.putIfAbsent(word, new ArrayList<>());
                                 topicMap.get(word).add(new Topic(word, e.getSalience(), e.getSentiment().getScore()));
 
-                                topicTweetMap.putIfAbsent(word, new ArrayList<>());
+                                topicTweetMap.putIfAbsent(word, new HashSet<>());
                                 topicTweetMap.get(word).add(id);
                             });
                 } catch (ExecutionException e) {
@@ -100,7 +97,7 @@ public class LanguageAPI {
                             })
                             .orElseThrow(IllegalStateException::new);
                     topic.score /= words.size();
-                    topic.tweetIds = topicTweetMap.get(topic.text);
+                    topic.tweetIds = new ArrayList<>(topicTweetMap.get(topic.text));
                     return topic;
                 })
                 .collect(Collectors.toList());

@@ -71,6 +71,10 @@ function App() {
         setDisplayedTweets({topic: word.text, ids: word.tweetIds});
     }
 
+    function getWordTooltip(word) {
+        return `${word.text} - weight: ${word.value.toFixed(2)}, sentiment: ${word.score.toFixed(2)}`
+    }
+
     function submit(event) {
         event.preventDefault();
         doPost("api/keywords", {screenName: screenName, numKeywords: 200}, function (data) {
@@ -78,7 +82,7 @@ function App() {
             console.log(words);
             setWordCloud(<ReactWordcloud words={words} size={[600, 400]}
                                          options={{scale: "log", rotations: 1, rotationAngles: [0], padding: 0}}
-                                         callbacks={{getWordColor: getWordColor, onWordClick: onWordClick}}/>);
+                                         callbacks={{getWordColor: getWordColor, onWordClick: onWordClick, getWordTooltip: getWordTooltip}}/>);
         });
     }
 

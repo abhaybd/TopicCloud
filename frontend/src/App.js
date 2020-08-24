@@ -45,7 +45,7 @@ function App() {
     function submit(event) {
         event.preventDefault();
         doPost("api/keywords", {screenName: screenName, numKeywords: 100}, function (data) {
-            let words = data.words;
+            let words = data.content.map(e => e.word);
             console.log(words);
             setWordCloud(<ReactWordcloud words={words} size={[600, 400]}
                                          options={{scale: "log", rotations: 1, rotationAngles: [0], padding: 0}}

@@ -1,14 +1,15 @@
 package com.coolioasjulio.topiccloud;
 
 import com.google.gson.Gson;
+import twitter4j.Status;
 import twitter4j.TwitterException;
 
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class KeywordServlet extends HttpServlet {
 
@@ -23,9 +24,10 @@ public class KeywordServlet extends HttpServlet {
 
             if (request != null && request.screenName != null && request.numKeywords != null) {
                 System.out.printf("Request: %s, num: %d\n", request.screenName, request.numKeywords);
-                Response response = processRequest(request);
+                Response<?> response = processRequest(request);
                 if (response != null) {
                     String json = gson.toJson(response);
+                    System.out.println(json);
                     resp.setStatus(200);
                     resp.setContentType("application/json");
                     resp.getWriter().print(json);
@@ -39,15 +41,23 @@ public class KeywordServlet extends HttpServlet {
         }
     }
 
-    private Response processRequest(Request request) {
+    private Response<Result[]> processRequest(Request request) {
         try {
-            List<String> tweets = TwitterAPI.getInstance().getRecentTweetsSanitized(request.screenName, NUM_TWEETS);
-            List<Word> words = LanguageAPI.getInstance().getEntities(tweets, SALIENCE_THRESHOLD);
-            words.sort(((Comparator<Word>) Word::compareTo).reversed());
+            List<Status> tweets = TwitterAPI.getInstance().getRecentTweets(request.screenName, NUM_TWEETS);
+            Map<Word, List<Long>> wordTweetMap = LanguageAPI.getInstance().getEntitiesAndIds(tweets, SALIENCE_THRESHOLD);
+            int sublistLen = Math.min(wordTweetMap.size(), request.numKeywords);
 
-            int sublistLen = Math.min(words.size(), request.numKeywords);
+            Set<Word> words = wordTweetMap.keySet()
+                    .stream()
+                    .sorted(((Comparator<Word>) Word::compareTo).reversed())
+                    .limit(sublistLen)
+                    .collect(Collectors.toCollection(HashSet::new));
 
-            return new Response(System.currentTimeMillis(), words.subList(0, sublistLen).toArray(new Word[0]));
+            wordTweetMap.keySet().retainAll(words);
+
+            Result[] results = wordTweetMap.entrySet().stream().map(e -> new Result(e.getKey(), e.getValue())).toArray(Result[]::new);
+
+            return new Response<>(System.currentTimeMillis(), results);
         } catch (TwitterException e) {
             e.printStackTrace();
             return null;
@@ -64,13 +74,23 @@ public class KeywordServlet extends HttpServlet {
         }
     }
 
-    private static class Response {
-        public final long timestamp;
-        public final Word[] words;
+    private static class Result {
+        public final Word word;
+        public final List<Long> ids;
 
-        private Response(long timestamp, Word[] words) {
+        private Result(Word word, List<Long> ids) {
+            this.word = word;
+            this.ids = ids;
+        }
+    }
+
+    private static class Response<T> {
+        public final long timestamp;
+        public final T content;
+
+        private Response(long timestamp, T content) {
             this.timestamp = timestamp;
-            this.words = words;
+            this.content = content;
         }
     }
 }

@@ -1,5 +1,6 @@
 package com.coolioasjulio.topiccloud;
 
+import twitter4j.Status;
 import twitter4j.TwitterException;
 
 import java.util.*;
@@ -7,8 +8,8 @@ import java.util.*;
 public class Playground {
     public static void main(String[] args) throws TwitterException {
         String user = "@GovInslee";
-        List<String> tweets = TwitterAPI.getInstance().getRecentTweetsSanitized(user, 100);
-        List<Word> words = LanguageAPI.getInstance().getEntities(tweets, 0.08);
+        List<Status> tweets = TwitterAPI.getInstance().getRecentTweets(user, 100);
+        List<Word> words = new ArrayList<>(LanguageAPI.getInstance().getEntitiesAndIds(tweets, 0.08).keySet());
 
         words.sort(((Comparator<Word>) Word::compareTo).reversed());
 

@@ -5,11 +5,13 @@ import com.google.api.gax.core.CredentialsProvider;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.cloud.language.v1.*;
 import com.google.common.collect.Lists;
+import twitter4j.Status;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
@@ -52,23 +54,32 @@ public class LanguageAPI {
         client = LanguageServiceClient.create(settings);
     }
 
-    public List<Word> getEntities(List<String> texts, double wordThreshold) {
-        List<ApiFuture<AnalyzeEntitySentimentResponse>> futures = texts.stream()
-                .map(s -> Document.newBuilder().setContent(s).setType(Document.Type.PLAIN_TEXT).build())
-                .map(doc -> AnalyzeEntitySentimentRequest.newBuilder().setDocument(doc).build())
-                .map(client.analyzeEntitySentimentCallable()::futureCall)
-                .collect(Collectors.toList());
+    public Map<Word, List<Long>> getEntitiesAndIds(List<Status> tweets, double wordThreshold) {
+        Map<ApiFuture<AnalyzeEntitySentimentResponse>, Long> futures = new HashMap<>();
+        for (Status tweet : tweets) {
+            String content = TwitterAPI.sanitizedContent(tweet);
+            Document doc = Document.newBuilder().setContent(content).setType(Document.Type.PLAIN_TEXT).build();
+            AnalyzeEntitySentimentRequest request = AnalyzeEntitySentimentRequest.newBuilder().setDocument(doc).build();
+            ApiFuture<AnalyzeEntitySentimentResponse> future = client.analyzeEntitySentimentCallable().futureCall(request);
+            futures.put(future, tweet.getId());
+        }
 
-        HashMap<String, List<Word>> map = new HashMap<>();
+        Map<String, List<Word>> wordMap = new HashMap<>();
+        Map<String, List<Long>> wordTweetMap = new HashMap<>();
         try {
-            for (ApiFuture<AnalyzeEntitySentimentResponse> future : futures) {
+            for (ApiFuture<AnalyzeEntitySentimentResponse> future : futures.keySet()) {
                 try {
                     AnalyzeEntitySentimentResponse response = future.get();
+                    long id = futures.get(future);
                     response.getEntitiesList().stream()
                             .filter(e -> e.getSalience() >= wordThreshold)
                             .forEach(e -> {
-                                map.putIfAbsent(e.getName(), new ArrayList<>());
-                                map.get(e.getName()).add(new Word(e.getName(), e.getSalience(), e.getSentiment().getScore()));
+                                String word = e.getName();
+                                wordMap.putIfAbsent(word, new ArrayList<>());
+                                wordMap.get(word).add(new Word(word, e.getSalience(), e.getSentiment().getScore()));
+
+                                wordTweetMap.putIfAbsent(word, new ArrayList<>());
+                                wordTweetMap.get(word).add(id);
                             });
                 } catch (ExecutionException e) {
                     e.printStackTrace();
@@ -78,7 +89,7 @@ public class LanguageAPI {
             throw new RuntimeException(e);
         }
 
-        return map.values()
+        return wordMap.values()
                 .stream()
                 .map(words -> {
                     Word word = words.stream()
@@ -89,7 +100,8 @@ public class LanguageAPI {
                             })
                             .orElseThrow(IllegalStateException::new);
                     return new Word(word.text, word.value, word.score / words.size());
-                }).collect(Collectors.toCollection(ArrayList::new));
+                })
+                .collect(Collectors.toMap(word -> word, word -> wordTweetMap.get(word.text)));
     }
 
     public List<Word> getEntities(String text, double threshold) {

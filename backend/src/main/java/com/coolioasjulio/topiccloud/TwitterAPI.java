@@ -19,7 +19,7 @@ public class TwitterAPI {
     }
 
     private static final Object instanceLock = new Object();
-    private static TwitterAPI instance;
+    private static volatile TwitterAPI instance;
 
     public static TwitterAPI getInstance() {
         if (instance == null) {
@@ -31,6 +31,15 @@ public class TwitterAPI {
         }
 
         return instance;
+    }
+
+    public static String sanitizedContent(Status status) {
+        String text = status.getText();
+        return text
+                .replaceAll("\\s+", " ")
+                .replaceAll("https?://\\S+", "")
+                .replaceAll("RT @\\S+", "")
+                .trim();
     }
 
     private final Twitter client;
@@ -55,15 +64,6 @@ public class TwitterAPI {
 
     public List<String> getRecentTweetsSanitized(String name, int numTweets) throws TwitterException {
         List<Status> statuses = getRecentTweets(name, numTweets);
-        return statuses.stream().map(this::sanitize).collect(Collectors.toList());
-    }
-
-    private String sanitize(Status status) {
-        String text = status.getText();
-        return text
-                .replaceAll("\\s+", " ")
-                .replaceAll("https?://\\S+", "")
-                .replaceAll("RT @\\S+", "")
-                .trim();
+        return statuses.stream().map(TwitterAPI::sanitizedContent).collect(Collectors.toList());
     }
 }

@@ -1,5 +1,7 @@
 package com.coolioasjulio.topiccloud;
 
+import java.util.Objects;
+
 public class Word implements Comparable<Word> {
     public String text;
     public double value;
@@ -18,6 +20,21 @@ public class Word implements Comparable<Word> {
 
     @Override
     public int compareTo(Word o) {
-        return Double.compare(value, o.value);
+        int compare = Double.compare(value, o.value);
+        return compare == 0 ? text.compareTo(o.text) : compare;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Word word = (Word) o;
+        return Double.compare(word.value, value) == 0 &&
+                text.equals(word.text);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(text);
     }
 }

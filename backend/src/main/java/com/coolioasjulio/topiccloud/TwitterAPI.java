@@ -53,6 +53,12 @@ public class TwitterAPI {
         }
     }
 
+    public List<String> getNameSuggestions(String name, int numSuggestions) throws TwitterException {
+        ResponseList<User> responseList = client.searchUsers(name, 1);
+        int len = Math.min(responseList.size(), numSuggestions);
+        return responseList.stream().map(User::getScreenName).limit(len).collect(Collectors.toList());
+    }
+
     public String getProfilePicURL(String name) throws TwitterException {
         return client.users().showUser(name).get400x400ProfileImageURLHttps();
     }

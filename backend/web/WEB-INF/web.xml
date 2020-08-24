@@ -5,22 +5,32 @@
          version="4.0">
 
     <servlet>
-        <servlet-name>KeywordServlet</servlet-name>
-        <servlet-class>com.coolioasjulio.topiccloud.KeywordServlet</servlet-class>
+        <servlet-name>Keyword</servlet-name>
+        <servlet-class>com.coolioasjulio.topiccloud.servlets.KeywordServlet</servlet-class>
     </servlet>
 
     <servlet>
-        <servlet-name>TwitterInfoServlet</servlet-name>
-        <servlet-class>com.coolioasjulio.topiccloud.TwitterInfoServlet</servlet-class>
+        <servlet-name>TwitterProfilePic</servlet-name>
+        <servlet-class>com.coolioasjulio.topiccloud.servlets.TwitterProfilePicServlet</servlet-class>
+    </servlet>
+
+    <servlet>
+        <servlet-name>TwitterNameSuggestions</servlet-name>
+        <servlet-class>com.coolioasjulio.topiccloud.servlets.TwitterNameSuggestionServlet</servlet-class>
     </servlet>
 
     <servlet-mapping>
-        <servlet-name>KeywordServlet</servlet-name>
+        <servlet-name>Keyword</servlet-name>
         <url-pattern>/api/keywords</url-pattern>
     </servlet-mapping>
 
     <servlet-mapping>
-        <servlet-name>TwitterInfoServlet</servlet-name>
-        <url-pattern>/api/twitterinfo</url-pattern>
+        <servlet-name>TwitterProfilePic</servlet-name>
+        <url-pattern>/api/twitterpfp</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>TwitterNameSuggestions</servlet-name>
+        <url-pattern>/api/twittersuggestions</url-pattern>
     </servlet-mapping>
 </web-app>

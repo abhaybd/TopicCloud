@@ -65,12 +65,12 @@ public class LanguageAPI {
         }
 
         Map<String, List<Topic>> topicMap = new HashMap<>();
-        Map<String, List<Long>> topicTweetMap = new HashMap<>();
+        Map<String, List<String>> topicTweetMap = new HashMap<>();
         try {
             for (ApiFuture<AnalyzeEntitySentimentResponse> future : futures.keySet()) {
                 try {
                     AnalyzeEntitySentimentResponse response = future.get();
-                    long id = futures.get(future);
+                    String id = Long.toUnsignedString(futures.get(future));
                     response.getEntitiesList().stream()
                             .filter(e -> e.getSalience() >= wordThreshold)
                             .forEach(e -> {

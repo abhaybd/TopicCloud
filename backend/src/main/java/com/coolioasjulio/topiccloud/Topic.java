@@ -7,7 +7,7 @@ public class Topic implements Comparable<Topic> {
     public String text;
     public double value;
     public double score;
-    public List<Long> tweetIds;
+    public List<String> tweetIds;
 
     public Topic(String text, double value, double score) {
         this.text = text;

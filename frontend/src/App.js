@@ -24,13 +24,32 @@ function App() {
     const [screenName, setScreenName] = React.useState("");
     const [wordCloud, setWordCloud] = React.useState(null);
 
+    function getColor(score) {
+        let r = 128, g = 128, b = 128;
+        let targetR = 0, targetG = 0, targetB = 0;
+        if (score > 0) {
+            targetG = 255;
+        } else {
+            targetR = 255;
+        }
+
+        score = Math.cbrt(Math.abs(score));
+
+        r += score * (targetR - r);
+        g += score * (targetG - g);
+        b += score * (targetB - b);
+
+        return `rgb(${Math.round(r)},${Math.round(g)},${Math.round(b)})`;
+    }
+
     function submit(event) {
         event.preventDefault();
         doPost("api/keywords", {screenName: screenName, numKeywords: 100}, function(data) {
             let words = data.words;
-            // words.forEach(w => w.value *= 10);
             console.log(words);
-            setWordCloud(<ReactWordcloud words={words} size={[600,400]} options={{scale: "log", rotations: 1, rotationAngles: [0], padding: 0}}/>);
+            setWordCloud(<ReactWordcloud words={words} size={[600,400]}
+                                         options={{scale: "log", rotations: 1, rotationAngles: [0], padding: 0}}
+            callbacks={{getWordColor: word => getColor(word.score)}}/>);
         });
     }
 

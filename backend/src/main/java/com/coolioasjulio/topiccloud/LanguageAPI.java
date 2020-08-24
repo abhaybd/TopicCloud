@@ -53,25 +53,22 @@ public class LanguageAPI {
     }
 
     public List<Word> getEntities(List<String> texts, double wordThreshold) {
-        List<ApiFuture<AnalyzeEntitiesResponse>> futures = texts.stream()
+        List<ApiFuture<AnalyzeEntitySentimentResponse>> futures = texts.stream()
                 .map(s -> Document.newBuilder().setContent(s).setType(Document.Type.PLAIN_TEXT).build())
-                .map(doc -> AnalyzeEntitiesRequest.newBuilder().setDocument(doc).build())
-                .map(client.analyzeEntitiesCallable()::futureCall)
+                .map(doc -> AnalyzeEntitySentimentRequest.newBuilder().setDocument(doc).build())
+                .map(client.analyzeEntitySentimentCallable()::futureCall)
                 .collect(Collectors.toList());
 
-        HashMap<String, Word> map = new HashMap<>();
+        HashMap<String, List<Word>> map = new HashMap<>();
         try {
-            for (ApiFuture<AnalyzeEntitiesResponse> future : futures) {
+            for (ApiFuture<AnalyzeEntitySentimentResponse> future : futures) {
                 try {
-                    AnalyzeEntitiesResponse response = future.get();
+                    AnalyzeEntitySentimentResponse response = future.get();
                     response.getEntitiesList().stream()
                             .filter(e -> e.getSalience() >= wordThreshold)
                             .forEach(e -> {
-                                if (map.containsKey(e.getName())) {
-                                    map.put(e.getName(), new Word(e.getName(), map.get(e.getName()).value + e.getSalience()));
-                                } else {
-                                    map.put(e.getName(), new Word(e.getName(), e.getSalience()));
-                                }
+                                map.putIfAbsent(e.getName(), new ArrayList<>());
+                                map.get(e.getName()).add(new Word(e.getName(), e.getSalience(), e.getSentiment().getScore()));
                             });
                 } catch (ExecutionException e) {
                     e.printStackTrace();
@@ -81,16 +78,27 @@ public class LanguageAPI {
             throw new RuntimeException(e);
         }
 
-        return new ArrayList<>(map.values());
+        return map.values()
+                .stream()
+                .map(words -> {
+                    Word word = words.stream()
+                            .reduce((cum, w) -> {
+                                cum.value += w.value;
+                                cum.score += w.score;
+                                return cum;
+                            })
+                            .orElseThrow(IllegalStateException::new);
+                    return new Word(word.text, word.value, word.score / words.size());
+                }).collect(Collectors.toCollection(ArrayList::new));
     }
 
     public List<Word> getEntities(String text, double threshold) {
         Document doc = Document.newBuilder().setContent(text).setType(Document.Type.PLAIN_TEXT).build();
-        AnalyzeEntitiesResponse response = client.analyzeEntities(doc);
+        AnalyzeEntitySentimentResponse response = client.analyzeEntitySentiment(doc);
         return response.getEntitiesList()
                 .stream()
                 .filter(e -> e.getSalience() > threshold)
-                .map(e -> new Word(e.getName(), e.getSalience()))
+                .map(e -> new Word(e.getName(), e.getSalience(), e.getSentiment().getScore()))
                 .collect(Collectors.toList());
     }
 }

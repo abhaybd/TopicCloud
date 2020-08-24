@@ -48,13 +48,13 @@ function TweetDisplay(props) {
 
     let tweets = null;
     if (props.content.ids) {
-        tweets = props.content.ids.map(id => <Tweet tweetId={id} align="right"/>);
+        tweets = props.content.ids.map(id => <Tweet tweetId={id}/>);
     }
 
     return (
         <div>
             <p>Topic: {props.content.topic}</p>
-            <div style={{overflowY: "scroll", width: "700px", height: "400px", margin: "0 auto"}}>
+            <div id="tweet-view">
                 {tweets}
             </div>
         </div>
@@ -65,6 +65,7 @@ function App() {
     const [screenName, setScreenName] = React.useState("");
     const [wordCloud, setWordCloud] = React.useState(null);
     const [displayedTweets, setDisplayedTweets] = React.useState({});
+    const [profileUrl, setProfileUrl] = React.useState(null);
 
     function onWordClick(word) {
         console.log("Clicked: " + word.text);
@@ -77,22 +78,37 @@ function App() {
 
     function submit(event) {
         event.preventDefault();
+        setDisplayedTweets({});
         doPost("api/keywords", {screenName: screenName, numKeywords: 200}, function (data) {
             let words = data.content;
             console.log(words);
             setWordCloud(<ReactWordcloud words={words} size={[600, 400]}
                                          options={{scale: "log", rotations: 1, rotationAngles: [0], padding: 0}}
                                          callbacks={{getWordColor: getWordColor, onWordClick: onWordClick, getWordTooltip: getWordTooltip}}/>);
+            doPost("api/twitterinfo", {screenName: screenName}, data => setProfileUrl(data.content));
         });
+    }
+
+    function screenNameInputChanged(event) {
+        let value = event.target.value;
+        if (value.length > 0) {
+            if (!value.startsWith("@")) {
+                value = "@" + value;
+            }
+        }
+        setScreenName(value);
     }
 
     return (
         <div className="App">
             <form onSubmit={submit}>
-                <input type="text" value={screenName} onChange={event => setScreenName(event.target.value)}/>
+                <input type="text" value={screenName} onChange={screenNameInputChanged}/>
                 <input type="submit" value="Generate"/>
             </form>
-            <center>{wordCloud}</center>
+            <div id="info">
+                {profileUrl ? <img id="profile-img" src={profileUrl} alt="Profile"/> : null}
+                {wordCloud}
+            </div>
             <TweetDisplay content={displayedTweets}/>
         </div>
     );

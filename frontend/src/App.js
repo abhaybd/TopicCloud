@@ -84,7 +84,11 @@ function App() {
             console.log(words);
             setWordCloud(<ReactWordcloud words={words} size={[600, 400]}
                                          options={{scale: "log", rotations: 1, rotationAngles: [0], padding: 0}}
-                                         callbacks={{getWordColor: getWordColor, onWordClick: onWordClick, getWordTooltip: getWordTooltip}}/>);
+                                         callbacks={{
+                                             getWordColor: getWordColor,
+                                             onWordClick: onWordClick,
+                                             getWordTooltip: getWordTooltip
+                                         }}/>);
             doPost("api/twitterpfp", {screenName: screenName}, data => setProfileUrl(data.content));
         });
     }

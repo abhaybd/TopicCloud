@@ -104,12 +104,12 @@ function App() {
         setScreenName(value);
     }
 
-    // TODO: show login button first, then
+    // TODO: Hide login button if already logged in (or maybe replace with logout)
     return (
         <div className="App">
             <span>
                 {/* TODO: This needs to be cleaner. Find a way to selectively do server-side routing */}
-                <img src={signinImg} onClick={() => window.location.href="http://localhost:8080/signin"}/>
+                <img src={signinImg} alt="Sign in with Twitter" onClick={() => window.location.href="http://localhost:8080/signin"}/>
             </span>
             <form onSubmit={submit}>
                 <input type="text" value={screenName} onChange={screenNameInputChanged}/>

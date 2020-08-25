@@ -1,12 +1,3 @@
-POST http://localhost:8080/api/twittersuggestions
-Content-Type: application/json
-
-{
-  "screenName": "GovInslee",
-  "numSuggestions": 5
-}
-
-###
 POST http://localhost:8080/api/twitterpfp
 Content-Type: application/json
 

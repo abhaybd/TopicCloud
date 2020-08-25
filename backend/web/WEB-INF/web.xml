@@ -46,11 +46,11 @@
 
     <servlet-mapping>
         <servlet-name>TwitterSignIn</servlet-name>
-        <url-pattern>/signin</url-pattern>
+        <url-pattern>/api/signin</url-pattern>
     </servlet-mapping>
 
     <servlet-mapping>
         <servlet-name>TwitterCallback</servlet-name>
-        <url-pattern>/callback</url-pattern>
+        <url-pattern>/api/callback</url-pattern>
     </servlet-mapping>
 </web-app>

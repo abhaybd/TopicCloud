@@ -109,7 +109,7 @@ function App() {
         <div className="App">
             <span>
                 {/* TODO: This needs to be cleaner. Find a way to selectively do server-side routing */}
-                <img src={signinImg} alt="Sign in with Twitter" onClick={() => window.location.href="http://localhost:8080/signin"}/>
+                <a href="/api/signin"><img src={signinImg} alt="Sign in with Twitter"/></a>
             </span>
             <form onSubmit={submit}>
                 <input type="text" value={screenName} onChange={screenNameInputChanged}/>

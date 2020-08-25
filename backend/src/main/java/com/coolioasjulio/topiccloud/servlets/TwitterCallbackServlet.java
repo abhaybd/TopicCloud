@@ -1,7 +1,6 @@
 package com.coolioasjulio.topiccloud.servlets;
 
 import com.coolioasjulio.topiccloud.TwitterAPI;
-import twitter4j.Twitter;
 import twitter4j.TwitterException;
 import twitter4j.auth.RequestToken;
 
@@ -23,6 +22,12 @@ public class TwitterCallbackServlet extends HttpServlet {
         } catch (TwitterException e) {
             throw new ServletException(e);
         }
-        response.sendRedirect("http://localhost:3000/");
+
+        String redirect = request.getContextPath() + "/";
+        if ("false".equals(System.getProperty("prod"))) {
+            redirect = "http://localhost:3000/";
+        }
+
+        response.sendRedirect(redirect);
     }
 }

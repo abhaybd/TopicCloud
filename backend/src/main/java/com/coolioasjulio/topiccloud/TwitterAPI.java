@@ -44,7 +44,7 @@ public class TwitterAPI {
 
     private final Twitter client;
 
-    public TwitterAPI() {
+    private TwitterAPI() {
         client = TwitterFactory.getSingleton();
         try {
             client.getOAuth2Token();

@@ -19,6 +19,16 @@
         <servlet-class>com.coolioasjulio.topiccloud.servlets.TwitterNameSuggestionServlet</servlet-class>
     </servlet>
 
+    <servlet>
+        <servlet-name>TwitterSignIn</servlet-name>
+        <servlet-class>com.coolioasjulio.topiccloud.servlets.TwitterSignInServlet</servlet-class>
+    </servlet>
+
+    <servlet>
+        <servlet-name>TwitterCallback</servlet-name>
+        <servlet-class>com.coolioasjulio.topiccloud.servlets.TwitterCallbackServlet</servlet-class>
+    </servlet>
+
     <servlet-mapping>
         <servlet-name>Keyword</servlet-name>
         <url-pattern>/api/keywords</url-pattern>
@@ -32,5 +42,15 @@
     <servlet-mapping>
         <servlet-name>TwitterNameSuggestions</servlet-name>
         <url-pattern>/api/twittersuggestions</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>TwitterSignIn</servlet-name>
+        <url-pattern>/signin</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>TwitterCallback</servlet-name>
+        <url-pattern>/callback</url-pattern>
     </servlet-mapping>
 </web-app>

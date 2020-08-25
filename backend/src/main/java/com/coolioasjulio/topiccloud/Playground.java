@@ -8,7 +8,7 @@ import java.util.*;
 public class Playground {
     public static void main(String[] args) throws TwitterException {
         String user = "@GovInslee";
-        List<Status> tweets = TwitterAPI.getInstance().getRecentTweets(user, 100);
+        List<Status> tweets = TwitterAPI.getSingleton().getRecentTweets(user, 100);
         List<Topic> topics = LanguageAPI.getInstance().getTopics(tweets, 0.08);
 
         topics.sort(((Comparator<Topic>) Topic::compareTo).reversed());

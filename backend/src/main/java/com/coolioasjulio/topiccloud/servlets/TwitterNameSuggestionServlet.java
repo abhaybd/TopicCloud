@@ -1,10 +1,12 @@
 package com.coolioasjulio.topiccloud.servlets;
 
 import com.coolioasjulio.topiccloud.TwitterAPI;
+import twitter4j.TwitterException;
 
+import javax.servlet.ServletException;
 import java.util.List;
 
-public class TwitterNameSuggestionServlet extends JSONServlet<TwitterNameSuggestionServlet.Request, TwitterNameSuggestionServlet.Response> {
+public class TwitterNameSuggestionServlet extends JSONTwitterServlet<TwitterNameSuggestionServlet.Request, TwitterNameSuggestionServlet.Response> {
 
     public TwitterNameSuggestionServlet() {
         super(Request.class);
@@ -16,9 +18,13 @@ public class TwitterNameSuggestionServlet extends JSONServlet<TwitterNameSuggest
     }
 
     @Override
-    protected Response handleRequest(Request request) throws Exception {
+    protected Response handleRequest(TwitterAPI client, Request request) throws ServletException {
         // TODO: This currently fails. We'll need to authenticate on a per-user basis (that'll help with rate limits too)
-        return new Response(TwitterAPI.getInstance().getNameSuggestions(request.screenName, request.numSuggestions));
+        try {
+            return new Response(client.getNameSuggestions(request.screenName, request.numSuggestions));
+        } catch (TwitterException e) {
+            throw new ServletException(e);
+        }
     }
 
     public static class Request {

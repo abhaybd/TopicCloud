@@ -1,8 +1,11 @@
 package com.coolioasjulio.topiccloud.servlets;
 
 import com.coolioasjulio.topiccloud.TwitterAPI;
+import twitter4j.TwitterException;
 
-public class TwitterProfilePicServlet extends JSONServlet<TwitterProfilePicServlet.Request, TwitterProfilePicServlet.Response> {
+import javax.servlet.ServletException;
+
+public class TwitterProfilePicServlet extends JSONTwitterServlet<TwitterProfilePicServlet.Request, TwitterProfilePicServlet.Response> {
 
     public TwitterProfilePicServlet() {
         super(Request.class);
@@ -14,8 +17,12 @@ public class TwitterProfilePicServlet extends JSONServlet<TwitterProfilePicServl
     }
 
     @Override
-    protected Response handleRequest(Request request) throws Exception {
-        return new Response(TwitterAPI.getInstance().getProfilePicURL(request.screenName));
+    protected Response handleRequest(TwitterAPI client, Request request) throws ServletException {
+        try {
+            return new Response(client.getProfilePicURL(request.screenName));
+        } catch (TwitterException e) {
+            throw new ServletException(e);
+        }
     }
 
     public static class Request {

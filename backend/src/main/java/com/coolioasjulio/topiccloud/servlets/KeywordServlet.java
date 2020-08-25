@@ -4,10 +4,12 @@ import com.coolioasjulio.topiccloud.LanguageAPI;
 import com.coolioasjulio.topiccloud.Topic;
 import com.coolioasjulio.topiccloud.TwitterAPI;
 import twitter4j.Status;
+import twitter4j.TwitterException;
 
+import javax.servlet.ServletException;
 import java.util.*;
 
-public class KeywordServlet extends JSONServlet<KeywordServlet.Request, KeywordServlet.Response> {
+public class KeywordServlet extends JSONTwitterServlet<KeywordServlet.Request, KeywordServlet.Response> {
 
     private static final double SALIENCE_THRESHOLD = 0.08;
     private static final int NUM_TWEETS = 100;
@@ -22,15 +24,25 @@ public class KeywordServlet extends JSONServlet<KeywordServlet.Request, KeywordS
     }
 
     @Override
-    protected Response handleRequest(Request request) throws Exception {
-        List<Status> tweets = TwitterAPI.getInstance().getRecentTweets(request.screenName, NUM_TWEETS);
-        List<Topic> topics = LanguageAPI.getInstance().getTopics(tweets, SALIENCE_THRESHOLD);
-        int sublistLen = Math.min(topics.size(), request.numKeywords);
+    protected Response handleRequest(TwitterAPI client, Request request) throws ServletException {
+        try {
+            try {
+                String name = client.client.getScreenName();
+                System.out.printf("Signed in to %s\n", name);
+            } catch (Exception e) {
+                System.out.println("Signed in with application credentials!");
+            }
+            List<Status> tweets = client.getRecentTweets(request.screenName, NUM_TWEETS);
+            List<Topic> topics = LanguageAPI.getInstance().getTopics(tweets, SALIENCE_THRESHOLD);
+            int sublistLen = Math.min(topics.size(), request.numKeywords);
 
-        topics.sort(((Comparator<Topic>) Topic::compareTo).reversed());
-        topics = topics.subList(0, sublistLen);
+            topics.sort(((Comparator<Topic>) Topic::compareTo).reversed());
+            topics = topics.subList(0, sublistLen);
 
-        return new Response(System.currentTimeMillis(), topics);
+            return new Response(System.currentTimeMillis(), topics);
+        } catch (TwitterException e) {
+            throw new ServletException(e);
+        }
     }
 
     public static class Request {

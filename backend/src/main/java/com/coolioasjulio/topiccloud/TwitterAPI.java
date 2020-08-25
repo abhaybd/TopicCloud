@@ -1,15 +1,20 @@
 package com.coolioasjulio.topiccloud;
 
+import com.google.gson.Gson;
 import twitter4j.*;
+import twitter4j.conf.Configuration;
+import twitter4j.conf.ConfigurationBuilder;
 
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.util.*;
 import java.util.stream.Collectors;
 
 public class TwitterAPI {
     public static void main(String[] args) {
-
         try {
-            List<Status> list = TwitterAPI.getInstance().getRecentTweets("@GovInslee", 10);
+            List<Status> list = TwitterAPI.getSingleton().getRecentTweets("@GovInslee", 10);
             for (Status s : list) {
                 System.out.printf("%s - %s\n\n", s.getCreatedAt(), s.getText().replaceAll("\\s+", " "));
             }
@@ -21,16 +26,41 @@ public class TwitterAPI {
     private static final Object instanceLock = new Object();
     private static volatile TwitterAPI instance;
 
-    public static TwitterAPI getInstance() {
+    public static TwitterAPI getSingleton() {
         if (instance == null) {
             synchronized (instanceLock) {
                 if (instance == null) {
-                    instance = new TwitterAPI();
+                    instance = createNew(true);
+                    try {
+                        instance.client.getOAuth2Token();
+                    } catch (TwitterException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
         }
 
         return instance;
+    }
+
+    public static TwitterAPI createNew() {
+        return createNew(false);
+    }
+
+    public static TwitterAPI createNew(boolean appOnlyAuth) {
+        Gson gson = new Gson();
+        try (Reader reader = new InputStreamReader(TwitterAPI.class.getResourceAsStream("/twitter.json"))) {
+            TwitterConf conf = gson.fromJson(reader, TwitterConf.class);
+            Configuration c = new ConfigurationBuilder()
+                    .setApplicationOnlyAuthEnabled(appOnlyAuth)
+                    .setOAuthConsumerKey(conf.consumerKey)
+                    .setOAuthConsumerSecret(conf.consumerSecret)
+                    .build();
+            Twitter client = new TwitterFactory(c).getInstance();
+            return new TwitterAPI(client);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public static String sanitizedContent(Status status) {
@@ -42,15 +72,10 @@ public class TwitterAPI {
                 .trim();
     }
 
-    private final Twitter client;
+    public final Twitter client;
 
-    private TwitterAPI() {
-        client = TwitterFactory.getSingleton();
-        try {
-            client.getOAuth2Token();
-        } catch (TwitterException e) {
-            e.printStackTrace();
-        }
+    public TwitterAPI(Twitter client) {
+        this.client = client;
     }
 
     public List<String> getNameSuggestions(String name, int numSuggestions) throws TwitterException {
@@ -71,5 +96,10 @@ public class TwitterAPI {
     public List<String> getRecentTweetsSanitized(String name, int numTweets) throws TwitterException {
         List<Status> statuses = getRecentTweets(name, numTweets);
         return statuses.stream().map(TwitterAPI::sanitizedContent).collect(Collectors.toList());
+    }
+
+    private static class TwitterConf {
+        public String consumerKey;
+        public String consumerSecret;
     }
 }

@@ -2,6 +2,7 @@ import React from 'react';
 import './App.css';
 import ReactWordcloud from "react-wordcloud";
 import {Tweet} from "react-twitter-widgets";
+import signinImg from "./twitter-signin.png";
 
 function doPost(endpoint, content, callback) {
     const http = new XMLHttpRequest();
@@ -103,8 +104,13 @@ function App() {
         setScreenName(value);
     }
 
+    // TODO: show login button first, then
     return (
         <div className="App">
+            <span>
+                {/* TODO: This needs to be cleaner. Find a way to selectively do server-side routing */}
+                <img src={signinImg} onClick={() => window.location.href="http://localhost:8080/signin"}/>
+            </span>
             <form onSubmit={submit}>
                 <input type="text" value={screenName} onChange={screenNameInputChanged}/>
                 <input type="submit" value="Generate"/>

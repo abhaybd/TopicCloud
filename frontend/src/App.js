@@ -102,10 +102,8 @@ function App() {
 
     function screenNameInputChanged(event) {
         let value = event.target.value;
-        if (value.length > 0) {
-            if (!value.startsWith("@")) {
-                value = "@" + value;
-            }
+        if (value.length > 0 && !value.startsWith("@")) {
+            value = "@" + value;
         }
         setScreenName(value);
     }

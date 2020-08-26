@@ -86,7 +86,7 @@ function App() {
     function submit(event) {
         event.preventDefault();
         setDisplayedTweets({});
-        doPost("api/keywords", {screenName: screenName, numKeywords: 200}, function (data) {
+        doPost("api/keywords", {screenName: screenName, numKeywords: 100}, function (data) {
             let words = data.topics;
             console.log(words);
             setWordCloud(<ReactWordcloud words={words} size={[600, 400]}

@@ -12,7 +12,7 @@ import java.util.*;
 public class KeywordServlet extends JSONTwitterServlet<KeywordServlet.Request, KeywordServlet.Response> {
 
     private static final double SALIENCE_THRESHOLD = 0.08;
-    private static final int NUM_TWEETS = 100;
+    private static final int NUM_TWEETS = 500;
 
     public KeywordServlet() {
         super(Request.class);

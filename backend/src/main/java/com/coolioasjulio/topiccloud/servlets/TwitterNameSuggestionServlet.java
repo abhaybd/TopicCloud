@@ -19,7 +19,6 @@ public class TwitterNameSuggestionServlet extends JSONTwitterServlet<TwitterName
 
     @Override
     protected Response handleRequest(TwitterAPI client, Request request) throws ServletException {
-        // TODO: This currently fails. We'll need to authenticate on a per-user basis (that'll help with rate limits too)
         try {
             return new Response(client.getNameSuggestions(request.screenName, request.numSuggestions));
         } catch (TwitterException e) {

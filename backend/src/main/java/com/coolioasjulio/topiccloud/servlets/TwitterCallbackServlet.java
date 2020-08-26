@@ -16,11 +16,22 @@ public class TwitterCallbackServlet extends HttpServlet {
         TwitterAPI client = (TwitterAPI) request.getSession().getAttribute("twitterClient");
         RequestToken requestToken = (RequestToken) request.getSession().getAttribute("requestToken");
         String verifier = request.getParameter("oauth_verifier");
-        try {
-            client.client.getOAuthAccessToken(requestToken, verifier);
-            request.getSession().removeAttribute("requestToken");
-        } catch (TwitterException e) {
-            throw new ServletException(e);
+
+        request.getSession().removeAttribute("requestToken");
+
+        boolean success = true;
+        if (verifier != null) {
+            try {
+                client.client.getOAuthAccessToken(requestToken, verifier);
+            } catch (TwitterException e) {
+                success = false;
+            }
+        } else {
+            success = false;
+        }
+
+        if (!success) {
+            request.getSession().removeAttribute("twitterClient");
         }
 
         String redirect = request.getContextPath() + "/";

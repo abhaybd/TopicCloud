@@ -108,7 +108,6 @@ function App() {
         setScreenName(value);
     }
 
-
     let loginComp;
     switch (loggedInUser) {
         case undefined:
@@ -127,15 +126,21 @@ function App() {
     return (
         <div className="App">
             {loginComp}
-            <form onSubmit={submit}>
-                <input type="text" value={screenName} onChange={screenNameInputChanged}/>
-                <input type="submit" value="Generate"/>
-            </form>
-            <div id="info">
-                {profileUrl ? <img id="profile-img" src={profileUrl} alt="Profile"/> : null}
-                {wordCloud}
-            </div>
-            <TweetDisplay content={displayedTweets}/>
+            {loggedInUser ?
+                <React.Fragment>
+                    <form onSubmit={submit}>
+                        <input type="text" value={screenName} onChange={screenNameInputChanged}/>
+                        <input type="submit" value="Generate"/>
+                    </form>
+                    <div id="info">
+                        {profileUrl ? <img id="profile-img" src={profileUrl} alt="Profile"/> : null}
+                        {wordCloud}
+                    </div>
+                    <TweetDisplay content={displayedTweets}/>
+                </React.Fragment>
+                : null
+            }
+
         </div>
     );
 }

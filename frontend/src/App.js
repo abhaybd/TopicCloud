@@ -67,6 +67,12 @@ function App() {
     const [wordCloud, setWordCloud] = React.useState(null);
     const [displayedTweets, setDisplayedTweets] = React.useState({});
     const [profileUrl, setProfileUrl] = React.useState(null);
+    const [loggedInUser, setLoggedInUser] = React.useState(undefined);
+
+    React.useEffect(() => {
+        console.log("Checking logged in!");
+        doPost("/api/loggedinuser", {}, data => setLoggedInUser(data.screenName ?? null));
+    }, []);
 
     function onWordClick(word) {
         console.log("Clicked: " + word.text);
@@ -81,7 +87,7 @@ function App() {
         event.preventDefault();
         setDisplayedTweets({});
         doPost("api/keywords", {screenName: screenName, numKeywords: 200}, function (data) {
-            let words = data.content;
+            let words = data.topics;
             console.log(words);
             setWordCloud(<ReactWordcloud words={words} size={[600, 400]}
                                          options={{scale: "log", rotations: 1, rotationAngles: [0], padding: 0}}
@@ -90,7 +96,7 @@ function App() {
                                              onWordClick: onWordClick,
                                              getWordTooltip: getWordTooltip
                                          }}/>);
-            doPost("api/twitterpfp", {screenName: screenName}, data => setProfileUrl(data.content));
+            doPost("api/twitterpfp", {screenName: screenName}, data => setProfileUrl(data.imageUrl));
         });
     }
 
@@ -104,13 +110,25 @@ function App() {
         setScreenName(value);
     }
 
-    // TODO: Hide login button if already logged in (or maybe replace with logout)
+
+    let loginComp;
+    switch (loggedInUser) {
+        case undefined:
+            loginComp = null;
+            break;
+
+        case null:
+            loginComp = <a href="/api/signin"><img src={signinImg} alt="Sign in with Twitter"/></a>;
+            break;
+
+        default:
+            loginComp = <p id="loggedin-label">Logged in as: @{loggedInUser}</p>;
+            break;
+    }
+
     return (
         <div className="App">
-            <span>
-                {/* TODO: This needs to be cleaner. Find a way to selectively do server-side routing */}
-                <a href="/api/signin"><img src={signinImg} alt="Sign in with Twitter"/></a>
-            </span>
+            {loginComp}
             <form onSubmit={submit}>
                 <input type="text" value={screenName} onChange={screenNameInputChanged}/>
                 <input type="submit" value="Generate"/>

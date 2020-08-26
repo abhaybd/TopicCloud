@@ -57,11 +57,11 @@ public class KeywordServlet extends JSONTwitterServlet<KeywordServlet.Request, K
 
     public static class Response {
         public final long timestamp;
-        public final List<Topic> content;
+        public final List<Topic> topics;
 
-        private Response(long timestamp, List<Topic> content) {
+        private Response(long timestamp, List<Topic> topics) {
             this.timestamp = timestamp;
-            this.content = content;
+            this.topics = topics;
         }
     }
 }

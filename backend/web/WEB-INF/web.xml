@@ -29,6 +29,11 @@
         <servlet-class>com.coolioasjulio.topiccloud.servlets.TwitterCallbackServlet</servlet-class>
     </servlet>
 
+    <servlet>
+        <servlet-name>GetLoggedInUser</servlet-name>
+        <servlet-class>com.coolioasjulio.topiccloud.servlets.GetLoggedInUserServlet</servlet-class>
+    </servlet>
+
     <servlet-mapping>
         <servlet-name>Keyword</servlet-name>
         <url-pattern>/api/keywords</url-pattern>
@@ -52,5 +57,10 @@
     <servlet-mapping>
         <servlet-name>TwitterCallback</servlet-name>
         <url-pattern>/api/callback</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>GetLoggedInUser</servlet-name>
+        <url-pattern>/api/loggedinuser</url-pattern>
     </servlet-mapping>
 </web-app>

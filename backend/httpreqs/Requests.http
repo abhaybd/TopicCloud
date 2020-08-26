@@ -1,3 +1,9 @@
+POST http://localhost:8080/api/isloggedin
+Content-Type: application/json
+
+{}
+
+###
 POST http://localhost:8080/api/twitterpfp
 Content-Type: application/json
 

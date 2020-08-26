@@ -34,10 +34,10 @@ public class TwitterProfilePicServlet extends JSONTwitterServlet<TwitterProfileP
     }
 
     public static class Response {
-        public final String content;
+        public final String imageUrl;
 
-        private Response(String content) {
-            this.content = content;
+        private Response(String imageUrl) {
+            this.imageUrl = imageUrl;
         }
     }
 }

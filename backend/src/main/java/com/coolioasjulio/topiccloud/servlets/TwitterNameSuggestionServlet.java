@@ -38,10 +38,10 @@ public class TwitterNameSuggestionServlet extends JSONTwitterServlet<TwitterName
     }
 
     public static class Response {
-        public final List<String> content;
+        public final List<String> suggestions;
 
-        private Response(List<String> content) {
-            this.content = content;
+        private Response(List<String> suggestions) {
+            this.suggestions = suggestions;
         }
     }
 }

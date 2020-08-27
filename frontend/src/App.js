@@ -62,6 +62,24 @@ function TweetDisplay(props) {
     );
 }
 
+function LoginComponent(props) {
+    switch (props.user) {
+        case undefined:
+            return null;
+
+        case null:
+            return (
+                <React.Fragment>
+                    Please sign in with twitter to use TopicCloud
+                    <a href="/api/signin"><img src={signinImg} alt="Sign in with Twitter"/></a>
+                </React.Fragment>
+            );
+
+        default:
+            return <p id="loggedin-label">Logged in as: @{props.user}</p>;
+    }
+}
+
 function App() {
     const [screenName, setScreenName] = React.useState("");
     const [wordCloud, setWordCloud] = React.useState(null);
@@ -108,24 +126,9 @@ function App() {
         setScreenName(value);
     }
 
-    let loginComp;
-    switch (loggedInUser) {
-        case undefined:
-            loginComp = null;
-            break;
-
-        case null:
-            loginComp = <a href="/api/signin"><img src={signinImg} alt="Sign in with Twitter"/></a>;
-            break;
-
-        default:
-            loginComp = <p id="loggedin-label">Logged in as: @{loggedInUser}</p>;
-            break;
-    }
-
     return (
         <div className="App">
-            {loginComp}
+            <LoginComponent user={loggedInUser}/>
             {loggedInUser ?
                 <React.Fragment>
                     <form onSubmit={submit}>

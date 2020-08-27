@@ -65,24 +65,20 @@ public class LanguageAPI {
         Map<String, Set<String>> topicTweetMap = new HashMap<>();
         try {
             for (ApiFuture<AnalyzeEntitySentimentResponse> future : futures.keySet()) {
-                try {
-                    AnalyzeEntitySentimentResponse response = future.get();
-                    String id = Long.toUnsignedString(futures.get(future));
-                    response.getEntitiesList().stream()
-                            .filter(e -> e.getSalience() >= wordThreshold)
-                            .forEach(e -> {
-                                String word = e.getName();
-                                topicMap.putIfAbsent(word, new ArrayList<>());
-                                topicMap.get(word).add(new Topic(word, e.getSalience(), e.getSentiment().getScore()));
+                AnalyzeEntitySentimentResponse response = future.get();
+                String id = Long.toUnsignedString(futures.get(future));
+                response.getEntitiesList().stream()
+                        .filter(e -> e.getSalience() >= wordThreshold)
+                        .forEach(e -> {
+                            String word = e.getName();
+                            topicMap.putIfAbsent(word, new ArrayList<>());
+                            topicMap.get(word).add(new Topic(word, e.getSalience(), e.getSentiment().getScore()));
 
-                                topicTweetMap.putIfAbsent(word, new HashSet<>());
-                                topicTweetMap.get(word).add(id);
-                            });
-                } catch (ExecutionException e) {
-                    e.printStackTrace();
-                }
+                            topicTweetMap.putIfAbsent(word, new HashSet<>());
+                            topicTweetMap.get(word).add(id);
+                        });
             }
-        } catch (InterruptedException e) {
+        } catch (InterruptedException | ExecutionException e) {
             throw new RuntimeException(e);
         }
 

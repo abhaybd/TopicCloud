@@ -40,7 +40,8 @@ public class KeywordServlet extends JSONTwitterServlet<KeywordServlet.Request, K
             topics = topics.subList(0, sublistLen);
 
             return new Response(System.currentTimeMillis(), topics);
-        } catch (TwitterException e) {
+        } catch (Exception e) {
+            e.printStackTrace();
             throw new ServletException(e);
         }
     }

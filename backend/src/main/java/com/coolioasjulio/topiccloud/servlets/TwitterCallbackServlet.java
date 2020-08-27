@@ -12,7 +12,7 @@ import java.io.IOException;
 
 public class TwitterCallbackServlet extends HttpServlet {
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         TwitterAPI client = (TwitterAPI) request.getSession().getAttribute("twitterClient");
         RequestToken requestToken = (RequestToken) request.getSession().getAttribute("requestToken");
         String verifier = request.getParameter("oauth_verifier");
